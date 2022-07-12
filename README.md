@@ -1,11 +1,9 @@
-[npm-downloads-image]: https://badgen.net/npm/dm/serve-static-bun
 [npm-url]: https://npmjs.org/package/serve-static-bun
 [npm-version-image]: https://badgen.net/npm/v/serve-static-bun
 
 # serve-static-bun
 
 [![NPM Version][npm-version-image]][npm-url]
-[![NPM Downloads][npm-downloads-image]][npm-url]
 
 Serve static files using `Bun.serve` or Bao.js.
 
