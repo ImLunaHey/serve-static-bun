@@ -1,7 +1,7 @@
+import type { FileBlob } from "bun";
 import type Context from "baojs/dist/context";
-import { existsSync, readFileSync, statSync } from "node:fs";
-import mime from "mime/lite";
-import normalizeSlashes from "./utils/normalize-slashes";
+import collapseSlashes from "./utils/collapse-slashes";
+import getFileInfo from "./utils/get-file-info";
 
 type TMiddlewareMode = "bao";
 
@@ -11,7 +11,6 @@ interface IBaseOptions {
 	collapseSlashes?: boolean;
 	stripFromPathname?: string | false;
 	headers?: HeadersInit;
-	fileEncoding?: BufferEncoding;
 	charset?: string;
 }
 interface IMiddlewareOptions extends IBaseOptions {
@@ -19,6 +18,10 @@ interface IMiddlewareOptions extends IBaseOptions {
 	middlewareMode: TMiddlewareMode;
 }
 type TOptions = IBaseOptions | IMiddlewareOptions;
+
+function getMimeType({ type }: FileBlob): string {
+	return type.indexOf(";charset") !== -1 ? type.substring(0, type.indexOf(";charset")) : type;
+}
 
 function isMiddleware(options: TOptions): options is IMiddlewareOptions {
 	return !!(options as IMiddlewareOptions).middlewareMode;
@@ -29,7 +32,6 @@ const defaultOptions: TOptions = {
 	dirTrailingSlash: true,
 	collapseSlashes: true,
 	stripFromPathname: false,
-	fileEncoding: "utf8",
 	charset: "utf-8",
 };
 
@@ -93,72 +95,67 @@ export default function serveStatic(root: string, options?: IBaseOptions): (req:
 export default function serveStatic(root: string, options: IMiddlewareOptions): (ctx: Context) => Promise<Context>;
 
 export default function serveStatic(root: string, options: TOptions) {
+	root = `${process.cwd()}/${root}`;
 	options = { ...defaultOptions, ...options };
-	const { index, dirTrailingSlash, collapseSlashes, stripFromPathname, headers, fileEncoding, charset } = options;
 
 	function getPathname({ pathname }: URL): string {
-		return stripFromPathname !== false ? pathname.replace(stripFromPathname, "") : pathname;
+		return options.stripFromPathname !== false ? pathname.replace(options.stripFromPathname, "") : pathname;
 	}
 
 	async function getResponse(req: Request): Promise<Response> {
 		const pathname = getPathname(new URL(req.url));
-		const filepath = `${process.cwd()}/${root}/${pathname}`;
-		const exists = existsSync(filepath);
-		const isFile = exists && statSync(filepath).isFile();
+		const file = await getFileInfo(`${root}/${pathname}`);
+		const indexFile = options.index !== false ? await getFileInfo(`${root}/${pathname}/${options.index}`) : null;
 
 		// Redirect to path with normalized slashes
 		let redirectPath = pathname;
-		if (collapseSlashes) {
-			redirectPath = normalizeSlashes(pathname, { removeTrailing: !pathname.endsWith("/") });
-			if (isFile) {
-				redirectPath = normalizeSlashes(pathname, { removeTrailing: true });
+		if (options.collapseSlashes) {
+			redirectPath = collapseSlashes(pathname, { removeTrailing: !pathname.endsWith("/") });
+			if (file.isFile) {
+				redirectPath = collapseSlashes(pathname, { removeTrailing: true });
 			}
 		}
 
 		// Add trailing slash
-		if (dirTrailingSlash && exists && !isFile && !pathname.endsWith("/")) {
+		if (options.dirTrailingSlash && file.exists && !file.isFile && !pathname.endsWith("/")) {
 			redirectPath = `${redirectPath}/`;
 		}
 
 		if (redirectPath !== pathname) {
 			return new Response(null, {
-				headers: { ...headers, Location: redirectPath },
+				headers: { ...options.headers, Location: redirectPath },
 				status: 308,
 			});
 		}
 
 		// If path does not exists
-		if (!exists) {
+		if (!file.exists) {
 			return new Response("404 Not Found", {
-				headers: { ...headers, "Content-Type": "text/plain; charset=utf-8" },
+				headers: { ...options.headers, "Content-Type": "text/plain; charset=utf-8" },
 				status: 404,
 			});
 		}
 
 		// If it is a file
-		if (isFile) {
-			const file = readFileSync(filepath, { encoding: fileEncoding });
-			return new Response(file, {
-				headers: { ...headers, "Content-Type": `${mime.getType(filepath)}; charset=${charset}` },
+		if (file.isFile) {
+			return new Response(await file.blob.arrayBuffer(), {
+				headers: { ...options.headers, "Content-Type": `${getMimeType(file.blob)}; charset=${options.charset}` },
 			});
 		}
 
 		// If it is a folder and it has an index
-		if (index && existsSync(`${filepath}/${index}`)) {
-			const file = readFileSync(`${filepath}/${index}`, {
-				encoding: fileEncoding,
-			});
-			return new Response(file, {
+		if (options.index && indexFile.exists) {
+			return new Response(await indexFile.blob.arrayBuffer(), {
 				headers: {
-					...headers,
-					"Content-Type": `${mime.getType(`${filepath}/${index}`)}; charset=${charset}`,
+					...options.headers,
+					"Content-Type": `${getMimeType(indexFile.blob)}; charset=${options.charset}`,
 				},
 			});
 		}
 
 		// If it is a folder and has no index
 		return new Response("403 Forbidden", {
-			headers: { ...headers, "Content-Type": "text/plain; charset=utf-8" },
+			headers: { ...options.headers, "Content-Type": "text/plain; charset=utf-8" },
 			status: 403,
 		});
 	}

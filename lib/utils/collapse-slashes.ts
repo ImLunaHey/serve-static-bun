@@ -12,7 +12,7 @@ interface IOptions {
  * @returns {string} New string with slashes normalized
  */
 
-export default function normalizeSlashes(
+export default function collapseSlashes(
 	str: string,
 	options: IOptions = { removeLeading: false, removeTrailing: false }
 ): string {

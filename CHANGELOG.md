@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2022-07-12
+
+### Changes
+
+- Use `Bun.file` instead of `node:fs`.
+
+### Removed
+
+- `mime` dependency. Now uses `Bun.file(file).type`!
+- `fileEncoding` option is gone, replaced by `charset` only.
+
 ## [0.1.1] - 2022-07-12
 
 ### Removed
