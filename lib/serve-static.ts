@@ -105,7 +105,10 @@ export default function serveStatic(root: string, options: TOptions) {
 	async function getResponse(req: Request): Promise<Response> {
 		const pathname = getPathname(new URL(req.url));
 		const file = await getFileInfo(`${root}/${pathname}`);
-		const indexFile = options.index !== false ? await getFileInfo(`${root}/${pathname}/${options.index}`) : null;
+		const indexFile =
+			file.exists && !file.isFile && options.index !== false
+				? await getFileInfo(`${root}/${pathname}/${options.index}`)
+				: null;
 
 		// Redirect to path with normalized slashes
 		let redirectPath = pathname;

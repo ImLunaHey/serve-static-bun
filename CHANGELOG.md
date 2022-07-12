@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.4] - 2022-07-12
+
+### Changes
+
+- Won't look for an index file if the path is not a directory.
+
 ## [0.1.3] - 2022-07-12
 
 ### Changes
