@@ -141,14 +141,14 @@ export default function serveStatic(root: string, options: TOptions) {
 
 		// If it is a file
 		if (file.isFile) {
-			return new Response(await file.blob.arrayBuffer(), {
+			return new Response(file.blob, {
 				headers: { ...options.headers, "Content-Type": `${getMimeType(file.blob)}; charset=${options.charset}` },
 			});
 		}
 
 		// If it is a folder and it has an index
 		if (options.index && indexFile.exists) {
-			return new Response(await indexFile.blob.arrayBuffer(), {
+			return new Response(indexFile.blob, {
 				headers: {
 					...options.headers,
 					"Content-Type": `${getMimeType(indexFile.blob)}; charset=${options.charset}`,
