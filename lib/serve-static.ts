@@ -164,7 +164,7 @@ export default function serveStatic(root: string, options: TOptions) {
 	}
 
 	if (isMiddleware(options)) {
-		const { middlewareMode, handleErrors } = options;
+		const { middlewareMode, handleErrors = true } = options;
 
 		switch (middlewareMode) {
 			case "bao":
