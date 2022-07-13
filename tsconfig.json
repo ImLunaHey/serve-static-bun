@@ -12,5 +12,5 @@
 		"types": ["bun-types"],
 		"esModuleInterop": true
 	},
-	"include": ["lib/**/*.ts"]
+	"include": ["src/**/*.ts"]
 }
