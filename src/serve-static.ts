@@ -1,4 +1,3 @@
-import type { FileBlob } from "bun";
 import type Context from "baojs/dist/context";
 import collapseSlashes from "./utils/collapse-slashes";
 import getFileInfo from "./utils/get-file-info";
@@ -11,6 +10,8 @@ interface IBaseOptions {
 	collapseSlashes?: boolean;
 	stripFromPathname?: string | false;
 	headers?: HeadersInit;
+	dotfiles?: "allow" | "deny";
+	defaultMimeType?: string;
 	charset?: string;
 }
 interface IMiddlewareOptions extends IBaseOptions {
@@ -18,10 +19,6 @@ interface IMiddlewareOptions extends IBaseOptions {
 	middlewareMode: TMiddlewareMode;
 }
 type TOptions = IBaseOptions | IMiddlewareOptions;
-
-function getMimeType({ type }: FileBlob): string {
-	return type.indexOf(";charset") !== -1 ? type.substring(0, type.indexOf(";charset")) : type;
-}
 
 function isMiddleware(options: TOptions): options is IMiddlewareOptions {
 	return !!(options as IMiddlewareOptions).middlewareMode;
@@ -32,6 +29,8 @@ const defaultOptions: TOptions = {
 	dirTrailingSlash: true,
 	collapseSlashes: true,
 	stripFromPathname: false,
+	dotfiles: "deny",
+	defaultMimeType: "text/plain",
 	charset: "utf-8",
 };
 
@@ -104,6 +103,7 @@ export default function serveStatic(root: string, options: TOptions) {
 
 	async function getResponse(req: Request): Promise<Response> {
 		const pathname = getPathname(new URL(req.url));
+		const filename = pathname.split("/").pop();
 		const file = await getFileInfo(`${root}/${pathname}`);
 		const indexFile =
 			file.exists && !file.isFile && options.index !== false
@@ -140,18 +140,23 @@ export default function serveStatic(root: string, options: TOptions) {
 		}
 
 		// If it is a file
-		if (file.isFile) {
+		if (file.isFile && ((options.dotfiles === "deny" && !filename.startsWith(".")) || options.dotfiles === "allow")) {
+			const mimeType = file.mimeType === "application/octet-stream" ? options.defaultMimeType : file.mimeType;
 			return new Response(file.blob, {
-				headers: { ...options.headers, "Content-Type": `${getMimeType(file.blob)}; charset=${options.charset}` },
+				headers: {
+					...options.headers,
+					"Content-Type": `${mimeType}; charset=${options.charset}`,
+				},
 			});
 		}
 
 		// If it is a folder and it has an index
-		if (options.index && indexFile.exists) {
+		if (options.index && indexFile?.exists) {
+			const mimeType = file.mimeType === "application/octet-stream" ? options.defaultMimeType : file.mimeType;
 			return new Response(indexFile.blob, {
 				headers: {
 					...options.headers,
-					"Content-Type": `${getMimeType(indexFile.blob)}; charset=${options.charset}`,
+					"Content-Type": `${mimeType}; charset=${options.charset}`,
 				},
 			});
 		}

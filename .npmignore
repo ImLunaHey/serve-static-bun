@@ -1,4 +1,4 @@
 **/node_modules
 src/**
-tests/**
 .editorconfig
+tsconfig.json

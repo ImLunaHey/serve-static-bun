@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2022-08-04
+
+### Added
+
+- [BREAKING] `dotfiles` option with `deny` as default. Your dotfiles will now respond with a 403 by default! No more leaking secrets.
+- `defaultMimeType` option. Defaults to `text/plain`. Files that usually responded with `application/octet-stream` will now respond with the `defaultMimeType`, instead of automatically downloading, which was quite weird.
+
 ## [0.1.4] - 2022-07-12
 
 ### Changes
