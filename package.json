@@ -1,6 +1,6 @@
 {
 	"name": "serve-static-bun",
-	"version": "0.1.4",
+	"version": "0.2.0",
 	"author": "Jakob Bouchard <jakob@jakobbouchard.dev>",
 	"repository": {
 		"type": "git",
