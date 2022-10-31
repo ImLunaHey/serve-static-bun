@@ -1,9 +1,8 @@
-[npm-url]: https://npmjs.org/package/serve-static-bun
-[npm-version-image]: https://badgen.net/npm/v/serve-static-bun
-
 # serve-static-bun
 
-[![NPM Version][npm-version-image]][npm-url]
+[![npm version](https://img.shields.io/npm/v/serve-static-bun?style=flat-square)](https://npm.im/serve-static-bun)
+[![npm bundle size](https://img.shields.io/bundlephobia/minzip/serve-static-bun?style=flat-square)](https://npm.im/serve-static-bun)
+[![npm downloads](https://img.shields.io/npm/dt/serve-static-bun?style=flat-square)](https://npm.im/serve-static-bun)
 
 Serve static files using `Bun.serve` or Bao.js.
 
@@ -11,9 +10,7 @@ Currently in beta. Aiming for similar features as [`expressjs/serve-static`](htt
 
 ## Install
 
-This is a [Bun](https://bun.sh/) module available through the
-[npm registry](https://www.npmjs.com/). Installation is done using the
-[`bun install` command](https://github.com/oven-sh/bun#bun-install):
+This is a [Bun](https://bun.sh/) module available through the [npm registry](https://www.npmjs.com/). Installation is done using the [`bun install` command](https://github.com/oven-sh/bun#bun-install):
 
 ```sh
 bun install serve-static-bun
@@ -27,9 +24,7 @@ import serveStatic from "serve-static-bun";
 
 ### `serveStatic(root, options)`
 
-Create a new middleware function to serve files from within a given root
-directory. The file to serve will be determined by combining `req.url`
-with the provided root directory.
+Create a new middleware function to serve files from within a given root directory. The file to serve will be determined by combining `req.url` with the provided root directory.
 
 When a file is not found, it will send a 404 response. If a directory is accessed, but no index file is found, a 403 response will be sent.
 
@@ -41,8 +36,7 @@ By default, slashes are automatically collapsed in the path, and a trailing slas
 
 ##### `index`
 
-By default this module will send "index.html" files in response to a request
-on a directory. To disable this, set it to `false`. To supply a new index, pass a string.
+By default this module will send "index.html" files in response to a request on a directory. To disable this, set it to `false`. To supply a new index, pass a string.
 
 ##### `dirTrailingSlash`
 
