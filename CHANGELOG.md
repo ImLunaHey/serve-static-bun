@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2022-10-31
+
+### Changed
+
+- The package is now an ES module instead of CJS.
+- The `src/` folder is now included in the npm build.
+
 ## [0.2.0] - 2022-08-04
 
 ### Added
