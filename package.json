@@ -1,6 +1,6 @@
 {
 	"name": "serve-static-bun",
-	"version": "0.3.0",
+	"version": "0.4.0",
 	"description": "Serve static files using Bun.serve or Bao.js",
 	"author": "Jakob Bouchard <jakob@jakobbouchard.dev> (https://jakobbouchard.dev/)",
 	"contributors": [
