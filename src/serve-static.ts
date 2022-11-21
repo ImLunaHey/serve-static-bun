@@ -1,4 +1,4 @@
-import type Context from "baojs/dist/context";
+import type { Context } from "baojs/dist/context";
 import collapseSlashes from "./utils/collapse-slashes";
 import getFileInfo from "./utils/get-file-info";
 
