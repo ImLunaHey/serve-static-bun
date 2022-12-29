@@ -10,11 +10,9 @@
 		"https://ko-fi.com/jakobbouchard"
 	],
 	"license": "MIT",
-	"homepage": "https://github.com/jakobbouchard/serve-static-bun#readme",
 	"repository": "github:jakobbouchard/serve-static-bun",
-	"bugs": {
-		"url": "https://github.com/jakobbouchard/serve-static-bun/issues"
-	},
+	"homepage": "https://github.com/jakobbouchard/serve-static-bun#readme",
+	"bugs": "https://github.com/jakobbouchard/serve-static-bun/issues",
 	"keywords": [
 		"bun",
 		"bunjs",
@@ -29,12 +27,11 @@
 	"types": "./dist/index.d.ts",
 	"scripts": {
 		"build": "rm -rf dist/ && tsc",
-		"check": "tsc --noEmit",
-		"test": "echo \"TODO: Add some tests\" && exit 1"
+		"check": "tsc --noEmit"
 	},
 	"devDependencies": {
-		"bun-types": "^0.2.2",
+		"bun-types": "^0.4.0",
 		"baojs": "^0.2.1",
-		"typescript": "^4.9.3"
+		"typescript": "^4.9.4"
 	}
 }

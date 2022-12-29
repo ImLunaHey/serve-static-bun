@@ -1,33 +1,55 @@
-import type { Errorlike, FileBlob } from "bun";
+import type { FileBlob } from "bun";
+import { isErrorlike } from "../types";
 
-interface IFileInfo {
+export interface FileInfo {
+	/**
+	 * A blob with the file's info.
+	 *
+	 * @see Bun.FileBlob
+	 */
 	blob: FileBlob;
+
+	/**
+	 * Whether the file exists.
+	 */
 	exists: boolean;
+
+	/**
+	 * Whether the file is a file. If `false`, it is a directory.
+	 */
 	isFile: boolean;
+
+	/**
+	 * The mime type of the file, if it can be determined.
+	 * If it cannot be determined, it will be `undefined`.
+	 */
 	mimeType?: string;
 }
 
-function getMimeType({ type }: FileBlob): string {
-	return type.indexOf(";charset") !== -1 ? type.substring(0, type.indexOf(";charset")) : type;
+function getMimeType({ type }: FileBlob) {
+	const charsetIndex = type.indexOf(";charset");
+	return charsetIndex !== -1 ? type.substring(0, charsetIndex) : type;
 }
 
-function isErrorlike(error: any): error is Errorlike {
-	return !!(error as Errorlike).code;
-}
-
-export default async function getFileInfo(path: string): Promise<IFileInfo> {
-	const info: IFileInfo = {
+/**
+ * Returns information about a file.
+ *
+ * @param path The path to the file
+ * @returns Information about the file
+ */
+export default async function getFileInfo(path: string) {
+	const info: FileInfo = {
 		blob: Bun.file(path),
 		exists: false,
 		isFile: false,
-		mimeType: undefined,
 	};
 
 	try {
 		await info.blob.arrayBuffer();
 		info.exists = true;
 		info.isFile = true;
-		info.mimeType = getMimeType(info.blob);
+		const mimeType = getMimeType(info.blob);
+		info.mimeType = mimeType === "application/octet-stream" ? undefined : mimeType;
 	} catch (error) {
 		if (isErrorlike(error)) {
 			switch (error.code) {

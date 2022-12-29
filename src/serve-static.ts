@@ -1,38 +1,160 @@
 import type { Context } from "baojs/dist/context";
-import collapseSlashes from "./utils/collapse-slashes";
-import getFileInfo from "./utils/get-file-info";
+import getBaoMiddleware from "./middleware/bao";
+import getFileInfo, { type FileInfo } from "./utils/get-file-info";
 
-type TMiddlewareMode = "bao";
+/**
+ * Options for serveStatic().
+ */
+interface ServeStaticBaseOptions {
+	/**
+	 * The file to use as an index/fallback.
+	 *
+	 * Set to `null` to disable index files.
+	 *
+	 * @default "index.html"
+	 */
+	index?: string | null;
 
-interface IBaseOptions {
-	index?: string | false;
+	/**
+	 * Add trailing slashes to directory paths.
+	 *
+	 * @default true
+	 */
 	dirTrailingSlash?: boolean;
+
+	/**
+	 * Collapses all leading, trailing and duplicate slashes from pathname.
+	 *
+	 * @default true
+	 */
 	collapseSlashes?: boolean;
-	stripFromPathname?: string | false;
+
+	/**
+	 * Remove the first occurence of a string from the pathname.
+	 */
+	stripFromPathname?: string;
+
+	/**
+	 * Headers to send with the response.
+	 *
+	 * Note that the `Content-Type` header will be overwritten.
+	 */
 	headers?: HeadersInit;
+
+	/**
+	 * Allow or deny serving dotfiles (e.g. .gitignore)
+	 *
+	 * @default "deny"
+	 */
 	dotfiles?: "allow" | "deny";
+
+	/**
+	 * The default mime type to send when one cannot be determined.
+	 *
+	 * @default "text/plain"
+	 */
 	defaultMimeType?: string;
+
+	/**
+	 * The charset to send.
+	 *
+	 * @default "utf-8"
+	 */
 	charset?: string;
 }
-interface IMiddlewareOptions extends IBaseOptions {
+
+/**
+ * Options for serveStatic() when used as a middleware.
+ */
+interface ServeStaticMiddlewareOptions extends ServeStaticBaseOptions {
+	/**
+	 * The type of middleware to generate.
+	 */
+	middlewareMode: "bao";
+
+	/**
+	 * If set to `false`, in the case of a 403 or 404 response, the unmodified context will be returned to Bao.js.
+	 * This allows you to handle the error yourself.
+	 *
+	 * @default true
+	 */
 	handleErrors?: boolean;
-	middlewareMode: TMiddlewareMode;
-}
-type TOptions = IBaseOptions | IMiddlewareOptions;
-
-function isMiddleware(options: TOptions): options is IMiddlewareOptions {
-	return !!(options as IMiddlewareOptions).middlewareMode;
 }
 
-const defaultOptions: TOptions = {
-	index: "index.html",
-	dirTrailingSlash: true,
-	collapseSlashes: true,
-	stripFromPathname: false,
-	dotfiles: "deny",
-	defaultMimeType: "text/plain",
-	charset: "utf-8",
-};
+/**
+ * Type guard for ServeStaticMiddlewareOptions.
+ */
+function isMiddleware(options: ServeStaticOptions): options is ServeStaticMiddlewareOptions {
+	return Object.hasOwn(options, "middlewareMode");
+}
+
+type ServeStaticOptions = ServeStaticBaseOptions | ServeStaticMiddlewareOptions;
+
+/**
+ * Get the correct pathname from the requested URL.
+ * @param url The requested URL
+ * @param stripFromPathname The string to remove from the pathname, if necessary
+ */
+function getPathname({ pathname }: URL, stripFromPathname: ServeStaticBaseOptions["stripFromPathname"]) {
+	return stripFromPathname ? pathname.replace(stripFromPathname, "") : pathname;
+}
+
+/**
+ * Get the normalized path to redirect to.
+ * @param pathname The requested pathname
+ * @param requestedFile The requested file
+ * @param options The serveStatic() options
+ */
+async function getRedirectPath(
+	pathname: string,
+	{ isFile }: FileInfo,
+	{ collapseSlashes, dirTrailingSlash }: Pick<ServeStaticBaseOptions, "collapseSlashes" | "dirTrailingSlash">
+) {
+	let redirectPath = pathname;
+
+	// Normalize slashes
+	if (collapseSlashes) {
+		const pkg = await import("./utils/collapse-slashes");
+		redirectPath = pkg.collapseSlashes(redirectPath, {
+			keepTrailing: redirectPath.endsWith("/"), // Preserve trailing slash if it exists
+		});
+	}
+
+	// Add trailing slash
+	if (dirTrailingSlash && !isFile && !redirectPath.endsWith("/")) {
+		redirectPath = `${redirectPath}/`;
+	}
+
+	return redirectPath;
+}
+
+/**
+ * Get the file to serve, either the requested file or the folder's index file.
+ * @param pathname The requested pathname
+ * @param requestedFile The requested file
+ * @param root The root path
+ * @param options The serveStatic() options
+ * @returns The file to serve, or null if none exists
+ */
+async function getFileToServe(
+	pathname: string,
+	requestedFile: FileInfo,
+	root: string,
+	{ index, dotfiles }: Pick<ServeStaticBaseOptions, "index" | "dotfiles">
+) {
+	const isDotfile = pathname.split("/").pop()?.startsWith(".");
+	if (requestedFile.isFile && (!isDotfile || dotfiles === "allow")) {
+		return requestedFile;
+	}
+
+	// If it is a folder and it has an index
+	const indexFile = index === null ? null : await getFileInfo(`${root}/${pathname}/${index}`);
+	if (indexFile?.exists && indexFile.isFile) {
+		return indexFile;
+	}
+
+	return null;
+}
 
 /**
  * For use with {@link Bun.serve}'s fetch function directly.
@@ -47,7 +169,10 @@ const defaultOptions: TOptions = {
  * @param root The path to the static files to serve
  * @param options
  */
-export default function serveStatic(root: string, options?: IBaseOptions): (req: Request) => Promise<Response>;
+export default function serveStatic(
+	root: string,
+	options?: ServeStaticBaseOptions
+): (req: Request) => Promise<Response>;
 
 /**
  * For use as a bao middleware.
@@ -91,102 +216,81 @@ export default function serveStatic(root: string, options?: IBaseOptions): (req:
  * @param root The path to the static files to serve
  * @param options
  */
-export default function serveStatic(root: string, options: IMiddlewareOptions): (ctx: Context) => Promise<Context>;
+export default function serveStatic(
+	root: string,
+	options: ServeStaticMiddlewareOptions
+): (ctx: Context) => Promise<Context>;
 
-export default function serveStatic(root: string, options: TOptions) {
+export default function serveStatic(root: string, options: ServeStaticOptions = {}) {
 	root = `${process.cwd()}/${root}`;
-	options = { ...defaultOptions, ...options };
+	const {
+		index = "index.html",
+		dirTrailingSlash = true,
+		collapseSlashes = true,
+		stripFromPathname,
+		headers,
+		dotfiles = "deny",
+		defaultMimeType = "text/plain",
+		charset = "utf-8",
+	} = options;
+	const wantsMiddleware = isMiddleware(options);
 
-	function getPathname({ pathname }: URL): string {
-		return options.stripFromPathname !== false ? pathname.replace(options.stripFromPathname, "") : pathname;
-	}
+	const getResponse = async (req: Request) => {
+		const pathname = getPathname(new URL(req.url), stripFromPathname);
+		const requestedFile = await getFileInfo(`${root}/${pathname}`);
 
-	async function getResponse(req: Request): Promise<Response> {
-		const pathname = getPathname(new URL(req.url));
-		const filename = pathname.split("/").pop();
-		const file = await getFileInfo(`${root}/${pathname}`);
-		const indexFile =
-			file.exists && !file.isFile && options.index !== false
-				? await getFileInfo(`${root}/${pathname}/${options.index}`)
-				: null;
-
-		// Redirect to path with normalized slashes
-		let redirectPath = pathname;
-		if (options.collapseSlashes) {
-			redirectPath = collapseSlashes(pathname, { removeTrailing: !pathname.endsWith("/") });
-			if (file.isFile) {
-				redirectPath = collapseSlashes(pathname, { removeTrailing: true });
-			}
-		}
-
-		// Add trailing slash
-		if (options.dirTrailingSlash && file.exists && !file.isFile && !pathname.endsWith("/")) {
-			redirectPath = `${redirectPath}/`;
-		}
-
-		if (redirectPath !== pathname) {
-			return new Response(null, {
-				headers: { ...options.headers, Location: redirectPath },
-				status: 308,
-			});
-		}
-
-		// If path does not exists
-		if (!file.exists) {
+		// If path does not exists, return 404
+		if (!requestedFile.exists) {
 			return new Response("404 Not Found", {
-				headers: { ...options.headers, "Content-Type": "text/plain; charset=utf-8" },
 				status: 404,
-			});
-		}
-
-		// If it is a file
-		if (file.isFile && ((options.dotfiles === "deny" && !filename.startsWith(".")) || options.dotfiles === "allow")) {
-			const mimeType = file.mimeType === "application/octet-stream" ? options.defaultMimeType : file.mimeType;
-			return new Response(file.blob, {
 				headers: {
-					...options.headers,
-					"Content-Type": `${mimeType}; charset=${options.charset}`,
+					...headers,
+					"Content-Type": `text/plain; charset=${charset}`,
 				},
 			});
 		}
 
-		// If it is a folder and it has an index
-		if (options.index && indexFile?.exists) {
-			const mimeType = file.mimeType === "application/octet-stream" ? options.defaultMimeType : file.mimeType;
-			return new Response(indexFile.blob, {
+		// Redirect to normalized path, if needed
+		const redirectPath = await getRedirectPath(pathname, requestedFile, { collapseSlashes, dirTrailingSlash });
+		if (redirectPath !== pathname) {
+			return new Response(undefined, {
+				status: 308, // Permanent Redirect, cacheable
 				headers: {
-					...options.headers,
-					"Content-Type": `${mimeType}; charset=${options.charset}`,
+					...headers,
+					Location: redirectPath,
 				},
 			});
 		}
 
-		// If it is a folder and has no index
+		// Serve file or index, if one of them exists
+		const fileToServe = await getFileToServe(pathname, requestedFile, root, { index, dotfiles });
+		if (fileToServe) {
+			return new Response(fileToServe.blob, {
+				headers: {
+					...headers,
+					"Content-Type": `${fileToServe.mimeType ?? defaultMimeType}; charset=${charset}`,
+				},
+			});
+		}
+
+		// Fallback to 403
 		return new Response("403 Forbidden", {
-			headers: { ...options.headers, "Content-Type": "text/plain; charset=utf-8" },
 			status: 403,
+			headers: {
+				...headers,
+				"Content-Type": `text/plain; charset=${charset}`,
+			},
 		});
-	}
+	};
 
-	if (isMiddleware(options)) {
+	if (wantsMiddleware) {
 		const { middlewareMode, handleErrors = true } = options;
 
 		switch (middlewareMode) {
 			case "bao":
-				return async function (ctx: Context) {
-					const res = await getResponse(ctx.req);
-					switch (res.status) {
-						case 403:
-						case 404:
-							return handleErrors ? ctx.sendRaw(res).forceSend() : ctx;
+				return getBaoMiddleware(getResponse, handleErrors);
 
-						default:
-							return ctx.sendRaw(res).forceSend();
-					}
-				};
-
-			default:
-				break;
+			// No default
 		}
 	}
 
