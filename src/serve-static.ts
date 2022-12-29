@@ -7,56 +7,57 @@ import getFileInfo, { type FileInfo } from "./utils/get-file-info";
  */
 interface ServeStaticBaseOptions {
 	/**
-	 * The file to use as an index/fallback.
-	 *
-	 * Set to `null` to disable index files.
+	 * By default this module will send "index.html" files in response to a request on a directory.
+	 * To disable this, set it to `null`. To supply a new index, pass a string.
 	 *
 	 * @default "index.html"
 	 */
 	index?: string | null;
 
 	/**
-	 * Add trailing slashes to directory paths.
+	 * Redirect to trailing "/" when the pathname is a dir.
 	 *
 	 * @default true
 	 */
 	dirTrailingSlash?: boolean;
 
 	/**
-	 * Collapses all leading, trailing and duplicate slashes from pathname.
+	 * Collapse all slashes in the pathname (`//blog///test` => `/blog/test`).
 	 *
 	 * @default true
 	 */
 	collapseSlashes?: boolean;
 
 	/**
-	 * Remove the first occurence of a string from the pathname.
+	 * Remove the first occurence of the specified string from the pathname.
+	 * Is not defined by default (no stripping).
 	 */
 	stripFromPathname?: string;
 
 	/**
-	 * Headers to send with the response.
-	 *
-	 * Note that the `Content-Type` header will be overwritten.
+	 * Headers to add to the response. The "Content-Type" header cannot be overwritten. If you want to
+	 * change the charset, use the `charset` option. If `collapseSlashes` or `dirTrailingSlash` is set,
+	 * a "Location" header will be set if the pathname needs to be changed.
 	 */
 	headers?: HeadersInit;
 
 	/**
-	 * Allow or deny serving dotfiles (e.g. .gitignore)
+	 * This option allows you to configure how the module handles dotfiles, i.e. files or directories that begin with a dot (".").
+	 * Dotfiles return a 403 by default (when this is set to "deny"), but this can be changed with this option.
 	 *
 	 * @default "deny"
 	 */
 	dotfiles?: "allow" | "deny";
 
 	/**
-	 * The default mime type to send when one cannot be determined.
+	 * The default mime type to send in the "Content-Type" HTTP header, when the file's cannot be determined.
 	 *
 	 * @default "text/plain"
 	 */
 	defaultMimeType?: string;
 
 	/**
-	 * The charset to send.
+	 * The "Content-Type" HTTP header charset parameter.
 	 *
 	 * @default "utf-8"
 	 */
@@ -69,6 +70,7 @@ interface ServeStaticBaseOptions {
 interface ServeStaticMiddlewareOptions extends ServeStaticBaseOptions {
 	/**
 	 * The type of middleware to generate.
+	 * When set to `"bao"`, it will return a Bao.js compatible handler function instead.
 	 */
 	middlewareMode: "bao";
 

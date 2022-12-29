@@ -36,7 +36,7 @@ By default, slashes are automatically collapsed in the path, and a trailing slas
 
 ##### `index`
 
-By default this module will send "index.html" files in response to a request on a directory. To disable this, set it to `false`. To supply a new index, pass a string.
+By default this module will send "index.html" files in response to a request on a directory. To disable this, set it to `null`. To supply a new index, pass a string.
 
 ##### `dirTrailingSlash`
 
@@ -48,25 +48,31 @@ Collapse all slashes in the pathname (`//blog///test` => `/blog/test`). Defaults
 
 ##### `stripFromPathname`
 
-Removes the first occurence of the specified string from the pathname. Defaults to `false` (disabled).
+Removes the first occurence of the specified string from the pathname. Is not defined by default (no stripping).
 
 ##### `headers`
 
-Headers to add to the response. The "Content-Type" header cannot be overwritten. If you want to change the charset, use the `charset` option. If `collapseSlashes` or `dirTrailingSlash` is set, a "Location" header will be set.
+Headers to add to the response. The "Content-Type" header cannot be overwritten. If you want to change the charset, use the `charset` option. If `collapseSlashes` or `dirTrailingSlash` is set, a "Location" header will be set if the pathname needs to be changed.
 
-##### `fileEncoding`
+##### `dotfiles`
 
-The encoding of the static files that will be served. Must be of `BufferEncoding` type. Defaults to `utf8`.
+This option allows you to configure how the module handles dotfiles, i.e. files or directories that begin with a dot ("."). Dotfiles return a 403 by default (when this is set to "deny"), but this can be changed with this option.
+
+##### `defaultMimeType`
+
+The default mime type to send in the "Content-Type" HTTP header, when the file's cannot be determined. Defaults to `text/plain`.
 
 ##### `charset`
 
 The "Content-Type" HTTP header charset parameter. Defaults to `utf-8`.
 
+#### Middleware mode options
+
 ##### `middlewareMode`
 
 When set to `"bao"`, it will return a Bao.js compatible handler function instead.
 
-##### `handleErrors` (**Middleware only**)
+##### `handleErrors`
 
 If set to `false`, in the case of a 403 or 404 response, the unmodified context will be returned to Bao.js. Defaults to `true`.
 
