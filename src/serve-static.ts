@@ -78,7 +78,9 @@ interface ServeStaticMiddlewareOptions extends ServeStaticBaseOptions {
 	 * If set to `false`, in the case of a 403 or 404 response, the unmodified context will be returned to Bao.js.
 	 * This allows you to handle the error yourself.
 	 *
-	 * @default true
+	 * If set to `true`, the error response will be sent to the client, without continuing the middleware chain.
+	 *
+	 * @default false
 	 */
 	handleErrors?: boolean;
 }
@@ -286,7 +288,7 @@ export default function serveStatic(root: string, options: ServeStaticOptions = 
 	};
 
 	if (wantsMiddleware) {
-		const { middlewareMode, handleErrors = true } = options;
+		const { middlewareMode, handleErrors = false } = options;
 
 		switch (middlewareMode) {
 			case "bao":

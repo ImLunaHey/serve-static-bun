@@ -74,7 +74,9 @@ When set to `"bao"`, it will return a Bao.js compatible handler function instead
 
 ##### `handleErrors`
 
-If set to `false`, in the case of a 403 or 404 response, the unmodified context will be returned to Bao.js. Defaults to `true`.
+If set to `false`, in the case of a 403 or 404 response, the unmodified context will be returned to Bao.js. This allows you to handle the error yourself.  
+If set to `true`, the error response will be sent to the client, without continuing the middleware chain.  
+Defaults to `false`.
 
 ## Examples
 

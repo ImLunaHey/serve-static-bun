@@ -6,6 +6,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [0.5.0] - 2022-12-29
+
+### Added
+
+- Descriptions for options in types.
+
+### Changed
+
+- Use typings for bun v0.4.0
+- Updated descriptions for options in README.md
+- Will now immediately send a 404 response if the file is not found, instead of redirecting to a normalized path before.
+- `handleErrors` option is now `false` by default.
+
 ## [0.4.0] - 2022-11-21
 
 ### Changed
