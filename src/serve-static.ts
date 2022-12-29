@@ -99,7 +99,10 @@ type ServeStaticOptions = ServeStaticBaseOptions | ServeStaticMiddlewareOptions;
  * @param url The requested URL
  * @param stripFromPathname The string to remove from the pathname, if necessary
  */
-function getPathname({ pathname }: URL, stripFromPathname: ServeStaticBaseOptions["stripFromPathname"]) {
+function getPathname(
+	{ pathname }: URL,
+	stripFromPathname: ServeStaticBaseOptions["stripFromPathname"]
+) {
 	return stripFromPathname ? pathname.replace(stripFromPathname, "") : pathname;
 }
 
@@ -112,7 +115,10 @@ function getPathname({ pathname }: URL, stripFromPathname: ServeStaticBaseOption
 async function getRedirectPath(
 	pathname: string,
 	{ isFile }: FileInfo,
-	{ collapseSlashes, dirTrailingSlash }: Pick<ServeStaticBaseOptions, "collapseSlashes" | "dirTrailingSlash">
+	{
+		collapseSlashes,
+		dirTrailingSlash,
+	}: Pick<ServeStaticBaseOptions, "collapseSlashes" | "dirTrailingSlash">
 ) {
 	let redirectPath = pathname;
 
@@ -192,7 +198,8 @@ export default function serveStatic(
  * const app = new Bao();
  *
  * // *any can be anything
- * // We need to strip /assets from the pathname, because when the root gets combined with the pathname, it results in /assets/assets/file.js.
+ * // We need to strip /assets from the pathname, because when the root gets combined with the pathname,
+ * // it results in /assets/assets/file.js.
  * app.get("/assets/*any", serveStatic("assets", { middlewareMode: "bao", stripFromPathname: "/assets" }));
  *
  * app.get("/", (ctx) => ctx.sendText("Hello Bao!"));
@@ -255,7 +262,10 @@ export default function serveStatic(root: string, options: ServeStaticOptions = 
 		}
 
 		// Redirect to normalized path, if needed
-		const redirectPath = await getRedirectPath(pathname, requestedFile, { collapseSlashes, dirTrailingSlash });
+		const redirectPath = await getRedirectPath(pathname, requestedFile, {
+			collapseSlashes,
+			dirTrailingSlash,
+		});
 		if (redirectPath !== pathname) {
 			return new Response(undefined, {
 				status: 308, // Permanent Redirect, cacheable

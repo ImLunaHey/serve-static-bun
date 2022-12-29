@@ -97,8 +97,12 @@ import serveStatic from "serve-static-bun";
 const app = new Bao();
 
 // *any can be anything
-// We need to strip /assets from the pathname, because when the root gets combined with the pathname, it results in /assets/assets/file.js.
-app.get("/assets/*any", serveStatic("assets", { middlewareMode: "bao", stripFromPathname: "/assets" }));
+// We need to strip /assets from the pathname, because when the root gets combined with the pathname,
+// it results in /assets/assets/file.js.
+app.get(
+	"/assets/*any",
+	serveStatic("assets", { middlewareMode: "bao", stripFromPathname: "/assets" })
+);
 
 app.get("/", (ctx) => ctx.sendText("Hello Bao!"));
 
