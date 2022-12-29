@@ -5,6 +5,9 @@ import type { Errorlike } from "bun";
  *
  * @param error The error to check
  */
-export function isErrorlike(error: any): error is Errorlike {
+export function isErrorlike(error: unknown): error is Errorlike {
+	if (typeof error !== "object" || error === null) {
+		return false;
+	}
 	return Object.hasOwn(error, "code");
 }

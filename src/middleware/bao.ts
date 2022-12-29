@@ -2,7 +2,7 @@ import type { Context } from "baojs/dist/context";
 
 export default function getBaoMiddleware(
 	getResponse: (req: Request) => Promise<Response>,
-	handleErrors: boolean
+	handleErrors: boolean,
 ) {
 	return async (ctx: Context) => {
 		const res = await getResponse(ctx.req);

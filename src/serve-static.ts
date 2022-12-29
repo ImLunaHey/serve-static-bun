@@ -101,7 +101,7 @@ type ServeStaticOptions = ServeStaticBaseOptions | ServeStaticMiddlewareOptions;
  */
 function getPathname(
 	{ pathname }: URL,
-	stripFromPathname: ServeStaticBaseOptions["stripFromPathname"]
+	stripFromPathname: ServeStaticBaseOptions["stripFromPathname"],
 ) {
 	return stripFromPathname ? pathname.replace(stripFromPathname, "") : pathname;
 }
@@ -118,7 +118,7 @@ async function getRedirectPath(
 	{
 		collapseSlashes,
 		dirTrailingSlash,
-	}: Pick<ServeStaticBaseOptions, "collapseSlashes" | "dirTrailingSlash">
+	}: Pick<ServeStaticBaseOptions, "collapseSlashes" | "dirTrailingSlash">,
 ) {
 	let redirectPath = pathname;
 
@@ -150,7 +150,7 @@ async function getFileToServe(
 	pathname: string,
 	requestedFile: FileInfo,
 	root: string,
-	{ index, dotfiles }: Pick<ServeStaticBaseOptions, "index" | "dotfiles">
+	{ index, dotfiles }: Pick<ServeStaticBaseOptions, "index" | "dotfiles">,
 ) {
 	const isDotfile = pathname.split("/").pop()?.startsWith(".");
 	if (requestedFile.isFile && (!isDotfile || dotfiles === "allow")) {
@@ -181,7 +181,7 @@ async function getFileToServe(
  */
 export default function serveStatic(
 	root: string,
-	options?: ServeStaticBaseOptions
+	options?: ServeStaticBaseOptions,
 ): (req: Request) => Promise<Response>;
 
 /**
@@ -229,7 +229,7 @@ export default function serveStatic(
  */
 export default function serveStatic(
 	root: string,
-	options: ServeStaticMiddlewareOptions
+	options: ServeStaticMiddlewareOptions,
 ): (ctx: Context) => Promise<Context>;
 
 export default function serveStatic(root: string, options: ServeStaticOptions = {}) {

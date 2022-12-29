@@ -101,7 +101,7 @@ const app = new Bao();
 // it results in /assets/assets/file.js.
 app.get(
 	"/assets/*any",
-	serveStatic("assets", { middlewareMode: "bao", stripFromPathname: "/assets" })
+	serveStatic("assets", { middlewareMode: "bao", stripFromPathname: "/assets" }),
 );
 
 app.get("/", (ctx) => ctx.sendText("Hello Bao!"));
