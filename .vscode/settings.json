@@ -1,6 +1,6 @@
 {
 	"explorer.fileNesting.patterns": {
-		"package.json": ".editorconfig, .npm*, bun.lockb, tsconfig.json",
+		"package.json": ".editorconfig, .eslint*, .npm*, .prettier*, bun.lockb, tsconfig.json",
 		"readme*": "changelog*, license*"
 	}
 }

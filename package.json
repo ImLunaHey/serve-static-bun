@@ -7,6 +7,7 @@
 		"Volodymyr Palamar <@gornostay25>"
 	],
 	"funding": [
+		"https://github.com/sponsors/jakobbouchard",
 		"https://ko-fi.com/jakobbouchard"
 	],
 	"license": "MIT",
@@ -23,15 +24,24 @@
 	],
 	"type": "module",
 	"source": "./src/index.ts",
+	"main": "./dist/index.js",
 	"module": "./dist/index.js",
 	"types": "./dist/index.d.ts",
 	"scripts": {
+		"prepublish": "bun run build",
 		"build": "rm -rf dist/ && tsc",
-		"check": "tsc --noEmit"
+		"check": "tsc --noEmit",
+		"lint": "prettier --check . && eslint .",
+		"format": "prettier --write ."
 	},
 	"devDependencies": {
-		"bun-types": "^0.4.0",
+		"@typescript-eslint/eslint-plugin": "^5.47.1",
+		"@typescript-eslint/parser": "^5.47.1",
 		"baojs": "^0.2.1",
+		"bun-types": "^0.4.0",
+		"eslint": "^8.30.0",
+		"eslint-config-prettier": "^8.5.0",
+		"prettier": "^2.8.1",
 		"typescript": "^4.9.4"
 	}
 }
