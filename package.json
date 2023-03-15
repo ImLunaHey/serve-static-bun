@@ -1,6 +1,6 @@
 {
 	"name": "serve-static-bun",
-	"version": "0.5.0",
+	"version": "0.5.1",
 	"description": "Serve static files using Bun.serve or Bao.js",
 	"author": "Jakob Bouchard <jakob@jakobbouchard.dev> (https://jakobbouchard.dev/)",
 	"contributors": [
@@ -36,15 +36,15 @@
 		"format": "prettier --write ."
 	},
 	"devDependencies": {
-		"@typescript-eslint/eslint-plugin": "^5.48.2",
-		"@typescript-eslint/parser": "^5.48.2",
+		"@typescript-eslint/eslint-plugin": "^5.55.0",
+		"@typescript-eslint/parser": "^5.55.0",
 		"baojs": "^0.2.1",
-		"bun-types": "^0.5.0",
-		"eslint": "^8.32.0",
-		"eslint-config-prettier": "^8.6.0",
+		"bun-types": "^0.5.7",
+		"eslint": "^8.36.0",
+		"eslint-config-prettier": "^8.7.0",
 		"husky": "^8.0.3",
-		"lint-staged": "^13.1.0",
-		"prettier": "^2.8.3",
-		"typescript": "^4.9.4"
+		"lint-staged": "^13.2.0",
+		"prettier": "^2.8.4",
+		"typescript": "^4.9.5"
 	}
 }
