@@ -3,7 +3,7 @@
 		"declaration": true,
 		"esModuleInterop": true,
 		"forceConsistentCasingInFileNames": true,
-		"importsNotUsedAsValues": "error",
+		"verbatimModuleSyntax": true,
 		"lib": ["ESNext"],
 		"module": "ESNext",
 		"moduleResolution": "node",
