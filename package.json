@@ -7,8 +7,7 @@
 		"Volodymyr Palamar <@gornostay25>"
 	],
 	"funding": [
-		"https://github.com/sponsors/jakobbouchard",
-		"https://ko-fi.com/jakobbouchard"
+		"https://github.com/sponsors/jakobbouchard"
 	],
 	"license": "MIT",
 	"repository": "github:jakobbouchard/serve-static-bun",
