@@ -233,7 +233,6 @@ export default function serveStatic(
 ): (ctx: Context) => Promise<Context>;
 
 export default function serveStatic(root: string, options: ServeStaticOptions = {}) {
-	root = `${process.cwd()}/${root}`;
 	const {
 		index = "index.html",
 		dirTrailingSlash = true,
