@@ -1,5 +1,5 @@
 > [!WARNING]
-> I no longer work in web development and I don't really have the time or interest in maintaining this repository anymore. It has been incompatible with umami for a while and it would take me too much time to update it. However, if anybody is interested in maintaining it, I would gladly transfer the repository and NPM package
+> I no longer work in web development and I don't really have the time or interest in maintaining this repository anymore. If anybody is interested in maintaining it, I would gladly transfer the repository and NPM package
 
 # serve-static-bun
 
